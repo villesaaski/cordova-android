@@ -58,6 +58,8 @@ public class AccelListener extends CordovaPlugin implements SensorEventListener 
 
     private CallbackContext callbackContext;              // Keeps track of the JS callback context.
 
+    private boolean gotAccurateResult = false;
+    
     /**
      * Create an accelerometer listener.
      */
@@ -184,6 +186,11 @@ public class AccelListener extends CordovaPlugin implements SensorEventListener 
         if (this.status == AccelListener.STARTING) {
             this.setStatus(AccelListener.ERROR_FAILED_TO_START);
             this.fail(AccelListener.ERROR_FAILED_TO_START, "Accelerometer could not be started.");
+        }        
+        else if(!this.gotAccurateResult && this.status == AccelListener.RUNNING){
+        	this.stop();
+        	this.setStatus(AccelListener.ERROR_FAILED_TO_START);
+            this.fail(AccelListener.ERROR_FAILED_TO_START, "Accelerometer could not get accurate result.");
         }
     }
 
@@ -203,6 +210,11 @@ public class AccelListener extends CordovaPlugin implements SensorEventListener 
         if (this.status == AccelListener.STOPPED) {
             return;
         }
+        
+        if (this.accuracy >= SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM) {
+        	this.gotAccurateResult = true;
+        }        
+        
         this.accuracy = accuracy;
     }
 
